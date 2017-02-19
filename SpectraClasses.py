@@ -33,9 +33,9 @@ class DataTools:
     @staticmethod
     def SpectraPlot(singleSpectra, pltOrAx, title, xLabel, yLabel):
         pltOrAx.plot(singleSpectra.T[0], singleSpectra.T[1]) 
-        plt.title(title)
-        plt.xlabel(xLabel)
-        plt.ylabel(yLabel)
+        pltOrAx.title.set_text(title)
+        pltOrAx.set_xlabel(xLabel)
+        pltOrAx.set_ylabel(yLabel)
         
     @staticmethod
     def GetAveragedImage(allSpectras, numOfPixels):
