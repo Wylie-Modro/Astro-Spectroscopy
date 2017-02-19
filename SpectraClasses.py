@@ -8,7 +8,7 @@ import os
 class LoadingData: 
     
     def LoadTextFromDirectoryIntoArray(self, commonStartOfFileName, directoryPath):
-        arrayOfData = []
+        listOfData = []
 
         print("Loading in images ...")
 
@@ -16,11 +16,11 @@ class LoadingData:
     
             if commonStartOfFileName in str(filename):
                 data = np.loadtxt(directoryPath+filename, skiprows=17, comments = '>>', usecols=(0,1))
-                arrayOfData.append(data)
+                listOfData.append(data)
             else:
                 print('Found: ' + str(filename))
     
-        return arrayOfData
+        return listOfData
             
     def LoadImageIntoVariable(self, nameOfFileWithDir):
         img = mpimg.imread(nameOfFileWithDir)
@@ -55,11 +55,15 @@ class DataTools:
             averagedSpectra.append([float(i),  total[i]]) 
         return np.array(averagedSpectra)
         
-        
-        
-        
-        
-        
+    @staticmethod
+    def GetMeanOfIntensities(intensities, xmin, xmax):
+        XIsum, ISum = 0
+        for x in range(xmin,xmax):
+            XIsum += float(x)*intensities[x]
+            ISum += intensities[x]
+        xMean = XIsum/ISum
+        return xMean   
+
         
     def GetMean(self, img):
         x = img.flatten()
@@ -73,6 +77,7 @@ class DataTools:
             mean1 = np.sum(x)/(np.size(x))
             arrayOfMeans.append(mean1)
         return arrayOfMeans
+    
     
     def GetMOM(self, arrayOfImages):
         meansSumed = 0
