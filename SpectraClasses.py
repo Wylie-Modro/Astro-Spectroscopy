@@ -31,11 +31,19 @@ class LoadingData:
 class DataTools:
     
     @staticmethod
-    def SpectraPlot(singleSpectra, pltOrAx, title, xLabel, yLabel):
-        pltOrAx.plot(singleSpectra.T[0], singleSpectra.T[1]) 
-        pltOrAx.title.set_text(title)
-        pltOrAx.set_xlabel(xLabel)
-        pltOrAx.set_ylabel(yLabel)
+    def CreateDictOfSpectra(averagedData):
+        dictOfSpectra= {}
+        for entry in averagedData:
+            dictOfSpectra[entry[0]] = entry[1]
+        return dictOfSpectra
+    
+    
+    @staticmethod
+    def SpectraPlot(singleSpectra, Ax, title, xLabel, yLabel):
+        Ax.plot(singleSpectra.T[0], singleSpectra.T[1]) 
+        Ax.title.set_text(title)
+        Ax.set_xlabel(xLabel)
+        Ax.set_ylabel(yLabel)
     
     @staticmethod
     def CompareAveragedToIndividualPlots(commonStartOfFileName, directoryPath, resolution):
@@ -165,7 +173,30 @@ class DataTools:
                 i+=1
         return averagedImageArray
 
-class CentroidAlgorithm():   
+
+
+class CentroidAlgorithm(): 
+      
+    @staticmethod
+    def GetMeanOfIntensities(DictOfSpectra, xmin, xmax):
+        XISum = 0.
+        ISum = 0.
+        for x in np.arange(xmin,xmax):
+            XISum += float(x)*DictOfSpectra[x]
+            ISum += DictOfSpectra[x]
+        xMean = XISum/ISum
+        return np.round(xMean, 0) 
+    
+
+    def GetCentroidPoisson(self, intensities, xmin, xmax):    
+        variance, ISum = 0
+        xMean = self.GetMeanOfIntensities(intensities, xmin, xmax)
+        for x in range(xmin,xmax):
+            ISum += intensities[x]
+            variance += intensities[x] * ((float(x) - xMean)**2)
+        errorInCentroid = variance/(ISum**2)
+        return errorInCentroid
+    
     
     @staticmethod  
     def LocatePeakRanges(averagedSpectra, gap, threashhold):
@@ -181,7 +212,7 @@ class CentroidAlgorithm():
             midValue = intensitiesDict[key+int(gap/2)]
             endValue = intensitiesDict[key+gap]
             if midValue - startValue > threashhold and midValue - endValue > threashhold :
-                print('Peak at:' + str(key + gap/2) +'!!!')
+                #print('Peak at:' + str(key + gap/2) +'!!!')
                 peakRanges.extend([key, key + gap/2, key + gap])
             else:
                 #print('No peak at:' + str(key + gap/2)+' intensitiesDict[key+gap]: ' + str(intensitiesDict[key+gap]))
@@ -203,7 +234,7 @@ class CentroidAlgorithm():
                         tempList.append(peak)
                     copyOftempList = list(tempList)
                     masterList.append(copyOftempList)
-                    tempList.clear()
+                    del tempList[:]
                     peakSet.clear()
             
             if peakRanges[peakRanges.index(peak1)+1] == peakRanges[-1]:
@@ -220,6 +251,7 @@ class CentroidAlgorithm():
         for peakColl in masterList:
             listOfTrailingPoints.append([min(peakColl),max(peakColl)])
         print('Number of Emission lines: ' + str(len(listOfTrailingPoints)))
+        #print('listOfTrailingPoints: ' + str(listOfTrailingPoints))
         return listOfTrailingPoints
             
             
