@@ -36,7 +36,31 @@ class DataTools:
         pltOrAx.title.set_text(title)
         pltOrAx.set_xlabel(xLabel)
         pltOrAx.set_ylabel(yLabel)
+    
+    @staticmethod
+    def CompareAveragedToIndividualPlots(commonStartOfFileName, directoryPath, resolution):
+        LoadData = LoadingData()
+        allFiles = LoadData.LoadTextFromDirectoryIntoArray(commonStartOfFileName, directoryPath)
+        averagedSpectra = DataTools.GetAveragedImage(allFiles , resolution)
+       
+        fig = plt.figure()
         
+        ax1 = fig.add_subplot(321)
+        ax2 = fig.add_subplot(322)
+        ax3 = fig.add_subplot(323)
+        ax4 = fig.add_subplot(324)
+        ax5 = fig.add_subplot(325)
+        ax6 = fig.add_subplot(326)
+        
+        DataTools.SpectraPlot(allFiles[0], ax1, commonStartOfFileName + str(1), 'Pixel (Number)', 'Intensity (Counts)')
+        DataTools.SpectraPlot(allFiles[1], ax2, commonStartOfFileName + str(2), 'Pixel (Number)', 'Intensity (Counts)')
+        DataTools.SpectraPlot(allFiles[2], ax3, commonStartOfFileName + str(3), 'Pixel (Number)', 'Intensity (Counts)')
+        DataTools.SpectraPlot(allFiles[3], ax4, commonStartOfFileName + str(4), 'Pixel (Number)', 'Intensity (Counts)')
+        DataTools.SpectraPlot(allFiles[4], ax5, commonStartOfFileName + str(5), 'Pixel (Number)', 'Intensity (Counts)')
+        
+        DataTools.SpectraPlot(averagedSpectra, ax6, 'Averaged ' + str(commonStartOfFileName), 'Pixel (Number)', 'Intensity (Counts)')
+    
+    
     @staticmethod
     def GetAveragedImage(allSpectras, numOfPixels):
         total = [] #Create empty list of desired size,numOfPixels
@@ -54,17 +78,8 @@ class DataTools:
         for i in range(numOfPixels):
             averagedSpectra.append([float(i),  total[i]]) 
         return np.array(averagedSpectra)
-        
-    @staticmethod
-    def GetMeanOfIntensities(intensities, xmin, xmax):
-        XIsum, ISum = 0
-        for x in range(xmin,xmax):
-            XIsum += float(x)*intensities[x]
-            ISum += intensities[x]
-        xMean = XIsum/ISum
-        return xMean   
+  
 
-        
     def GetMean(self, img):
         x = img.flatten()
         mean1 = np.sum(x)/(np.size(x))
@@ -149,8 +164,65 @@ class DataTools:
                 averagedImageArray[i]+=p
                 i+=1
         return averagedImageArray
-            
 
+class CentroidAlgorithm():   
+    
+    @staticmethod  
+    def LocatePeakRanges(averagedSpectra, gap, threashhold):
+        peakRanges=[]
+        intensitiesDict = {}
+        for entry in averagedSpectra:
+            intensitiesDict[entry.T[0]] = entry.T[1]
+            
+        for key in intensitiesDict.keys():
+            if key+gap >= 2047.0:
+                gap = float(int(gap/2))
+            startValue = intensitiesDict[key]
+            midValue = intensitiesDict[key+int(gap/2)]
+            endValue = intensitiesDict[key+gap]
+            if midValue - startValue > threashhold and midValue - endValue > threashhold :
+                print('Peak at:' + str(key + gap/2) +'!!!')
+                peakRanges.extend([key, key + gap/2, key + gap])
+            else:
+                #print('No peak at:' + str(key + gap/2)+' intensitiesDict[key+gap]: ' + str(intensitiesDict[key+gap]))
+                pass
+        return peakRanges
+
+    @staticmethod 
+    def IsolatePeaks(peakRanges):
+        peakSet = set()
+        masterList = []
+        tempList = []
+        for peak1 in peakRanges:
+            if np.abs(peak1 - peakRanges[peakRanges.index(peak1)+1]) < 10:
+                peakSet.add(peak1)
+                peakSet.add(peakRanges[peakRanges.index(peak1)+1])
+            else: 
+                if len(peakSet) > 0:
+                    for peak in peakSet:
+                        tempList.append(peak)
+                    copyOftempList = list(tempList)
+                    masterList.append(copyOftempList)
+                    tempList.clear()
+                    peakSet.clear()
+            
+            if peakRanges[peakRanges.index(peak1)+1] == peakRanges[-1]:
+                for peak in peakSet:
+                    tempList.append(peak)
+                masterList.append(tempList)
+                return masterList
+    
+    
+    def GetEmissionLineExtremas(self, averagedSpectra, gap, threashhold):
+        peakRanges = self.LocatePeakRanges(averagedSpectra, gap, threashhold)
+        masterList = self.IsolatePeaks(peakRanges)
+        listOfTrailingPoints = []
+        for peakColl in masterList:
+            listOfTrailingPoints.append([min(peakColl),max(peakColl)])
+        print('Number of Emission lines: ' + str(len(listOfTrailingPoints)))
+        return listOfTrailingPoints
+            
+            
 class Distributions:
     
     def PoissonDistribution(self,n,theMean):
