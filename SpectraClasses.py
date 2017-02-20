@@ -4,14 +4,13 @@ import matplotlib.image as mpimg
 import math as maths
 import os
 
-
 class LoadingData: 
     
     def LoadTextFromDirectoryIntoArray(self, commonStartOfFileName, directoryPath):
         arrayOfData = []
 
         print("Loading in images ...")
-
+        
         for filename in os.listdir(directoryPath):
     
             if commonStartOfFileName in str(filename):
@@ -27,7 +26,6 @@ class LoadingData:
         img = 1.0*img #to make float
         return img
     
-
 class DataTools:
     
     @staticmethod
@@ -54,12 +52,6 @@ class DataTools:
         for i in range(numOfPixels):
             averagedSpectra.append([float(i),  total[i]]) 
         return np.array(averagedSpectra)
-        
-        
-        
-        
-        
-        
         
     def GetMean(self, img):
         x = img.flatten()
@@ -145,7 +137,6 @@ class DataTools:
                 i+=1
         return averagedImageArray
             
-
 class Distributions:
     
     def PoissonDistribution(self,n,theMean):

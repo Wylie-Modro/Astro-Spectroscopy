@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import SpectraClasses as SpectraCls
 
-
 LoadData = SpectraCls.LoadingData()
 DataTools = SpectraCls.DataTools()
 
@@ -14,11 +13,11 @@ allHgGDL = LoadData.LoadTextFromDirectoryIntoArray('HgGDL', '2017Lab2GroupB/HgGD
 allNeGDL = LoadData.LoadTextFromDirectoryIntoArray('NeGDL', '2017Lab2GroupB/NeGDL/')
 
 averagedIncandescentBulb = DataTools.GetAveragedImage(allIncandescentBulb, 2048)
-averagedFluoroscentBulb = DataTools.GetAveragedImage(allFluoroscentBulb , 2048)
-averagedH2GDL = DataTools.GetAveragedImage(allH2GDL , 2048)
-averagedHeGDL = DataTools.GetAveragedImage(allHeGDL , 2048)
-averagedHgGDL = DataTools.GetAveragedImage(allHgGDL , 2048)
-averagedNeGDL = DataTools.GetAveragedImage(allNeGDL , 2048)
+averagedFluoroscentBulb = DataTools.GetAveragedImage(allFluoroscentBulb, 2048)
+averagedH2GDL = DataTools.GetAveragedImage(allH2GDL, 2048)
+averagedHeGDL = DataTools.GetAveragedImage(allHeGDL, 2048)
+averagedHgGDL = DataTools.GetAveragedImage(allHgGDL, 2048)
+averagedNeGDL = DataTools.GetAveragedImage(allNeGDL, 2048)
 
 fig = plt.figure()
 
