@@ -10,10 +10,6 @@ CentroidAl = SpectraCls.CentroidAlgorithm()
 '''
 #Part A: Determine the wavelength calibration of the spectrometer, i.e., the mapping between pixel number and wavelength
 #-----------------------------------------------------------------------------------------------------------------------
-#Initialize classes
-LoadData = SpectraCls.LoadingData()
-DataTools = SpectraCls.DataTools()
-CentroidAl = SpectraCls.CentroidAlgorithm()
     
 #Load Data and get averaged-spectra
 allHeGDL = LoadData.LoadTextFromDirectoryIntoArray('HeGDL', '2017Lab2GroupB/HeGDL/')
@@ -41,19 +37,6 @@ plt.show()
 #Part B: Use the method of linear least squares to determine a polynomial fit to these centroid data to derive the wavelength solution.
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#___Least Squares Fitting___
-allHeGDL = LoadData.LoadTextFromDirectoryIntoArray('HeGDL', '2017Lab2GroupB/HeGDL/')
-averagedHeGDL = DataTools.GetAveragedImage(allHeGDL , 2048)
-
-#Use the automatic centriod algorithm to get all emission line pixel positions
-HeGDLDict = DataTools.CreateDictOfSpectra(averagedHeGDL)
-allEmissionLineRangeExtremas = CentroidAl.GetEmissionLineExtremas(averagedHeGDL, 10., 800.)
-
-allEmissionLinePositions = []
-for pairOfExtremas in allEmissionLineRangeExtremas: 
-    allEmissionLinePositions.append(CentroidAl.GetMeanOfIntensities(HeGDLDict, pairOfExtremas[0], pairOfExtremas[1]))
-  
-
 def CreateWLCalibrationMainMatrix(orderOfApprox, i):
     iterDimOfMainMatrix = range(orderOfApprox + 2)[1:]
     mainMatrix = []
@@ -69,87 +52,62 @@ def CreateWLCalibrationMainMatrix(orderOfApprox, i):
 
 
 def CreateWLCalibrationWLMatrix(orderOfApprox, i, WLs):
-    iterDimOfWLMatrix = range(orderOfApprox + 2)
+    iterDimOfWLMatrix = range(orderOfApprox+1)
+    #print('iterDimOfWLMatrix: ' + str(iterDimOfWLMatrix))
     WLMatrix = []
     for entryNum in iterDimOfWLMatrix:
         WLMatrix.append(np.sum(WLs*(i**entryNum)))
-    print('WLMatrix: ' + str(WLMatrix))
+    #print('WLMatrix: ' + str(WLMatrix))
     return WLMatrix
 
-'''
-def CreateWLCalibrationConstMatrix(orderOfApprox, i, WLs):
-    constantsMatrix = []
-    for k in iterDimOfWLMatrix:
-        constantsMatrix.append(object)
-    return 
-'''
+def GetWLCalibrationWLMatrix(orderOfApprox, constantsResultMatrix):
+    constantList = []
+    for i in range(orderOfApprox):
+        constantList.append(constantsResultMatrix[i])
+    return np.array(constantList)
 
+def GetNewWLFromLeastSqrsMethod(constantsResultMatrix, allEmissionLinePositions):
+    orderOfApprox = len(constantsResultMatrix)
+    newWLs = []
+    for position in allEmissionLinePositions:
+        nextNewWL = 0
+        for index in range(orderOfApprox):
+            nextNewWL += constantsResultMatrix[index] * (position**index)
+        newWLs.append(nextNewWL)
+    return newWLs
+
+#___Least Squares Fitting___
+allHeGDL = LoadData.LoadTextFromDirectoryIntoArray('HeGDL', '2017Lab2GroupB/HeGDL/')
+averagedHeGDL = DataTools.GetAveragedImage(allHeGDL , 2048)
+
+#Use the automatic centriod algorithm to get all emission line pixel positions
+HeGDLDict = DataTools.CreateDictOfSpectra(averagedHeGDL)
+allEmissionLineRangeExtremas = CentroidAl.GetEmissionLineExtremas(averagedHeGDL, 10., 800.)
+
+allEmissionLinePositions = []
+for pairOfExtremas in allEmissionLineRangeExtremas: 
+    allEmissionLinePositions.append(CentroidAl.GetMeanOfIntensities(HeGDLDict, pairOfExtremas[0], pairOfExtremas[1]))
+  
+
+WLs = []
+for pixelValue in allEmissionLinePositions:
+    WLs.append(CentroidAl.SimplePixlToWLMapping(pixelValue))
+print('WLs: ' + str(WLs))
     
-print(CreateWLCalibrationMainMatrix(3, np.array(allEmissionLinePositions)))
-#CreateWLCalibrationWLMatrix(3, i, WLs)
+mainMatrix = CreateWLCalibrationMainMatrix(3, np.array(allEmissionLinePositions))
+WLMatrix = CreateWLCalibrationWLMatrix(3, np.array(allEmissionLinePositions), np.array(WLs))
+#print('WLMatrix: ' + str(WLMatrix))
 
-'''
-N = 4 #Number of data points
-a0 = 1
-a1 = 1
-a2 = 1
-a3 = 1
+invMainMatrix = np.linalg.inv(mainMatrix)
+#print('Test matrix inversion gives identity: '+str(np.dot(invMainMatrix,mainMatrix)))
 
-i = np.arange(N, dtype= float) #i=[1,2,3,4]
-WL = []
+constantsResultMatrix = np.dot(invMainMatrix, WLMatrix)
+#print('constantsResultMatrix: ' + str(constantsResultMatrix))
 
-#Create the Matrices
-ma = np.array([[N, np.sum(i), np.sum(i**2), np.sum(i**3)], [np.sum(i), np.sum(i**2), np.sum(i**3), np.sum(i**4)], 
-               [np.sum(i**2), np.sum(i**3), np.sum(i**4), np.sum(i**5)], [np.sum(i**3), np.sum(i**4), np.sum(i**5), np.sum(i**6)]])
-mc = np.array([[WL], [WL*np.sum(i)], [WL*np.sum(i**2)], [WL*np.sum(i**3)]])
-
-print('mc: ' + str(mc))
-#Compute the gradient and intercept
-invMa = np.linalg.inv(ma)
-print('invMa: ' + str(invMa))
-print('---------------------------------------------------------------')
-print('Test matrix inversion gives identity: '+str(np.dot(invMa,ma)))
-print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-print('mc: ' + str(mc))
-constantsResult = np.dot(invMa, mc)
+print('newWLs: ' + str(GetNewWLFromLeastSqrsMethod(constantsResultMatrix, allEmissionLinePositions)))
 
 
-#Overplot the best fit
-a0Fit = constantsResult[0,0]
-a1Fit = constantsResult[1,0]
-a2Fit = constantsResult[2,0]
-a3Fit = constantsResult[3,0]
-print('a0Fit: ' + str(a0Fit))
-print('a1Fit: ' + str(a1Fit))
-print('a2Fit: ' + str(a2Fit))
-print('a3Fit: ' + str(a3Fit))
-'''
-'''
-plt.plot(x, mFit*x + cFit)
-plt.axis('scaled')
-plt.text(5, 15, 'm = {:.3f}\nc = {:.3f}' .format(mFit, cFit))
-
-
-#Deriving Standard Deviation 
-stDev = (1/(N-2))*(np.sum((y - (mFit*x + cFit))**2))
-print('stDev: ' + str(stDev))
-
-uncertaintyM = (N*(stDev**2))/((N*np.sum(x**2))-((np.sum(np.sum(x)))**2))
-print('uncertaintyM: ' + str(uncertaintyM))
-
-uncertaintyC = ((np.sum(x**2))*(stDev**2))/((N*np.sum(x**2))-((np.sum(np.sum(x)))**2))
-print('uncertaintyC: ' + str(uncertaintyC))
-'''
-
-
-
-
-
-
-
-
-
-'''
+''' Given Lab Code
 #___Least Squares Fitting___
 
 N = 20 #Number of data points
