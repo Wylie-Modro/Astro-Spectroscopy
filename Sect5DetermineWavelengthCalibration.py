@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import SpectraClasses as SpectraCls
 
+#Initialize classes
+LoadData = SpectraCls.LoadingData()
+DataTools = SpectraCls.DataTools()
+CentroidAl = SpectraCls.CentroidAlgorithm()
+
 '''
 #Part A: Determine the wavelength calibration of the spectrometer, i.e., the mapping between pixel number and wavelength
 #-----------------------------------------------------------------------------------------------------------------------
@@ -37,7 +42,53 @@ plt.show()
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #___Least Squares Fitting___
+allHeGDL = LoadData.LoadTextFromDirectoryIntoArray('HeGDL', '2017Lab2GroupB/HeGDL/')
+averagedHeGDL = DataTools.GetAveragedImage(allHeGDL , 2048)
 
+#Use the automatic centriod algorithm to get all emission line pixel positions
+HeGDLDict = DataTools.CreateDictOfSpectra(averagedHeGDL)
+allEmissionLineRangeExtremas = CentroidAl.GetEmissionLineExtremas(averagedHeGDL, 10., 800.)
+
+allEmissionLinePositions = []
+for pairOfExtremas in allEmissionLineRangeExtremas: 
+    allEmissionLinePositions.append(CentroidAl.GetMeanOfIntensities(HeGDLDict, pairOfExtremas[0], pairOfExtremas[1]))
+  
+
+def CreateWLCalibrationMainMatrix(orderOfApprox, i):
+    iterDimOfMainMatrix = range(orderOfApprox + 2)[1:]
+    mainMatrix = []
+    for col in iterDimOfMainMatrix:
+        rowMatrix = []
+        for row in iterDimOfMainMatrix:
+            rowMatrix.append(np.sum(i**(row+col-2)))
+        rowMatrixCopy = rowMatrix.copy()
+        mainMatrix.append(rowMatrixCopy)
+        #print('theMatrix: ' + str(theMatrix))
+        del rowMatrix
+    return mainMatrix
+
+
+def CreateWLCalibrationWLMatrix(orderOfApprox, i, WLs):
+    iterDimOfWLMatrix = range(orderOfApprox + 2)
+    WLMatrix = []
+    for entryNum in iterDimOfWLMatrix:
+        WLMatrix.append(np.sum(WLs*(i**entryNum)))
+    print('WLMatrix: ' + str(WLMatrix))
+    return WLMatrix
+
+'''
+def CreateWLCalibrationConstMatrix(orderOfApprox, i, WLs):
+    constantsMatrix = []
+    for k in iterDimOfWLMatrix:
+        constantsMatrix.append(object)
+    return 
+'''
+
+    
+print(CreateWLCalibrationMainMatrix(3, np.array(allEmissionLinePositions)))
+#CreateWLCalibrationWLMatrix(3, i, WLs)
+
+'''
 N = 4 #Number of data points
 a0 = 1
 a1 = 1
@@ -51,6 +102,7 @@ WL = []
 ma = np.array([[N, np.sum(i), np.sum(i**2), np.sum(i**3)], [np.sum(i), np.sum(i**2), np.sum(i**3), np.sum(i**4)], 
                [np.sum(i**2), np.sum(i**3), np.sum(i**4), np.sum(i**5)], [np.sum(i**3), np.sum(i**4), np.sum(i**5), np.sum(i**6)]])
 mc = np.array([[WL], [WL*np.sum(i)], [WL*np.sum(i**2)], [WL*np.sum(i**3)]])
+
 print('mc: ' + str(mc))
 #Compute the gradient and intercept
 invMa = np.linalg.inv(ma)
@@ -71,7 +123,7 @@ print('a0Fit: ' + str(a0Fit))
 print('a1Fit: ' + str(a1Fit))
 print('a2Fit: ' + str(a2Fit))
 print('a3Fit: ' + str(a3Fit))
-
+'''
 '''
 plt.plot(x, mFit*x + cFit)
 plt.axis('scaled')

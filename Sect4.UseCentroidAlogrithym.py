@@ -26,7 +26,7 @@ for pairOfExtremas in allEmissionLineRangeExtremas:
 print('allEmissionLinePositions: ' + str(allEmissionLinePositions))  
 
 
-plt.show()
+#plt.show()
 
 
     
