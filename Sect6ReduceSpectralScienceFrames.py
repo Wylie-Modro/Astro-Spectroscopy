@@ -21,6 +21,8 @@ LoadData = SpectraCls.LoadingData()
 DataTools = SpectraCls.DataTools()
 
 [allBiasData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b1', 'data-2013-10-26-shane-public/biasData/')
+
+averagedResult = DataTools.NewGetAveragedData(allBiasData, xlength, ylength)#print('averagedResult: ' + str(averagedResult))
 '''
 averagedBiasData = DataTools.GetAveragedData(allBiasData, 2048)
 fig = plt.figure()     
@@ -28,6 +30,13 @@ ax1 = fig.add_subplot(111)
 DataTools.SpectraPlot(averagedBiasData, ax1, 'Averaged Bias Image', 'xPixel', 'yPixel')
 plt.show()
 '''
-print(allBiasData)
+#print(allBiasData)
 print(xlength)
 print(ylength)
+print('-------------------------------------------------------')
+
+#for dataSet in allBiasData:
+    #print('dataSet: ' + str(dataSet))
+    
+
+

@@ -88,13 +88,14 @@ class DataTools:
     
     @staticmethod
     def GetAveragedImage(allSpectras, numOfPixels):
-        total = [] #Create empty list of desired size,numOfPixels
+        total = [] #Create empty list of desired size, numOfPixels
         for i in range(numOfPixels):
-            total.append(0.)
+            total.append(0.) #initializes array with numOfPixels entries of 0
             
         averagedSpectra = [] 
         for eachSpectra in allSpectras:
             for i in range(numOfPixels):
+                print('range(numOfPixels): ' + str(range(numOfPixels)))
                 total[i] += eachSpectra[i].T[1] #Summing values of allSpectras for each pixel
         for i in range(numOfPixels):
             #Dividing that total by number of spectras to get average
@@ -105,29 +106,79 @@ class DataTools:
         return np.array(averagedSpectra)
     
     @staticmethod
+    def NewGetAveragedData(allSpectras, xlength, ylength):
+        summedList = []
+        for y in range(ylength):
+            summedList.append([])
+            for x in range(xlength):
+                summedList[y].append(0)
+        summedMatrix = np.matrix(summedList)
+        
+        for eachSpectra in allSpectras:
+            summedMatrix += np.matrix(eachSpectra)
+        print('summedMatrix before: ' + str(summedMatrix))
+        
+        summedMatrix =  summedMatrix/len(allSpectras)
+        
+        '''
+        averagedlist = []
+        for y in range(ylength):
+            averagedlist.append([])
+            for x in range(xlength):
+                averagedlist[y].append(0)
+        summedMatrix = np.matrix(summedList)
+        for row in summedMatrix:
+            for entry in row:
+                print('entry before: ' + str(entry))
+                entry = entry/len(allSpectras)
+                print('entry after: ' + str(entry))
+        print('summedMatrix after: ' + str(summedMatrix))
+        averagedMatrix = summedMatrix
+        '''
+        print('summedMatrix: ' + str(summedMatrix))
+    
+    @staticmethod
     def GetAveragedData(allSpectras, xlength, ylength):
+        print('xlength:' + str(xlength))
+        print('ylength:' + str(ylength))
         totalx = [] 
         totaly =[]
         
         for i in range(xlength):
             totalx.append(0.)
+        print('len(totalx): ' + str(len(totalx)))
+        for i in range(ylength):
+            totaly.append(0.)
             
         averagedSpectra = [] 
+        matrix = []
         for eachSpectra in allSpectras:
-            for i in range(ylength):
-                for j in range(xlength):
-                    totalx[j] += eachSpectra[j].T[1] 
-                totaly[i]    
-        for i in range(ylength):
-            for j in range(xlength):
-                totalx[j] = totalx[j]/len(allSpectras)
+            print('len(eachSpectra): ' + str(len(eachSpectra)))
+            #for j in range(ylength):
+                #totalx[j] += eachSpectra[i]
+            for entry in eachSpectra:
+                row = []
+                print('len(entry): ' + str(len(entry)))
+                for i in range(xlength):
+                    #matrix[entry[row[i]]] += entry[i]  
+                    row[i] += entry[i]
+                rowCopy = row.copy()
+                matrix.append(rowCopy)
+                del row
+        print('matrix: ' + str(matrix))       
                 
-        for i in range(ylength):
-            for j in range(xlength):
-                averagedSpectra.append([totalx[j]]) 
-                
+        for i in range(xlength):
+            totalx[i] = totalx[i]/len(allSpectras)
+        for j in range(ylength):
+            totalx[j] = totaly[j]/len(allSpectras)
+            
+        for i in range(xlength):
+            averagedSpectra.append([totalx[i]]) 
+        for j in range(ylength):
+            averagedSpectra.append([totaly[j]])
+            
         return np.array(averagedSpectra)
-    
+    '''
         iterDimOfMainMatrix = range(orderOfApprox + 2)
         mainMatrix = []
     
@@ -140,7 +191,7 @@ class DataTools:
             #print('theMatrix: ' + str(theMatrix))
             del rowMatrix
         return mainMatrix
-    
+    '''
     def GetMean(self, img):
         x = img.flatten()
         mean1 = np.sum(x)/(np.size(x))
