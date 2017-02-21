@@ -14,31 +14,20 @@ image = pyfits.open('data-2013-10-26-shane-public/biasData/b101.fits')
 
 imagedata = image[0].data
 for i in imagedata:
-    print(i)
-print(len(imagedata))
+    xlength=len(i)
+ylength=len(imagedata)
 
 LoadData = SpectraCls.LoadingData()
 DataTools = SpectraCls.DataTools()
+
+[allBiasData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b1', 'data-2013-10-26-shane-public/biasData/')
 '''
-allBiasData = LoadData.LoadTextFromDirectoryIntoArray('b', 'data-2013-10-26-shane-public/biasData/')
-
-
-        listOfData = []
-
-        print("Loading in images ...")
-
-        for filename in os.listdir(directoryPath):
-    
-            if commonStartOfFileName in str(filename):
-                data = np.loadtxt(directoryPath+filename, skiprows=17, comments = '>>', usecols=(0,1))
-                listOfData.append(data)
-            else:
-                print('Found: ' + str(filename))
-    
-        return listOfData
-
-averagedBiasData = DataTools.GetAveragedImage(allBiasData, 2048)
-
-fig = plt.figure()
+averagedBiasData = DataTools.GetAveragedData(allBiasData, 2048)
+fig = plt.figure()     
+ax1 = fig.add_subplot(111)
+DataTools.SpectraPlot(averagedBiasData, ax1, 'Averaged Bias Image', 'xPixel', 'yPixel')
 plt.show()
 '''
+print(allBiasData)
+print(xlength)
+print(ylength)

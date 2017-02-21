@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import math as maths
 import os
-
+import pyfits
 
 class LoadingData: 
     
@@ -27,7 +27,25 @@ class LoadingData:
         img = 1.0*img #to make float
         return img
     
+    def LoadDataFromDirectoryIntoArray(self, commonStartOfFileName, directoryPath):
+        listOfData = []
+        
+        print("Loading in images ...")
 
+        for filename in os.listdir(directoryPath):
+    
+            if commonStartOfFileName in str(filename):
+                image = pyfits.open(directoryPath+filename)
+                imagedata = image[0].data
+                for i in imagedata:
+                    xlength=len(i)
+                    ylength=len(imagedata)
+                listOfData.append(imagedata)
+            else:
+                print('Found: ' + str(filename))
+                      
+        return [listOfData, xlength, ylength]
+    
 class DataTools:
     
     @staticmethod
@@ -68,7 +86,6 @@ class DataTools:
         
         DataTools.SpectraPlot(averagedSpectra, ax6, 'Averaged ' + str(commonStartOfFileName), 'Pixel (Number)', 'Intensity (Counts)')
     
-    
     @staticmethod
     def GetAveragedImage(allSpectras, numOfPixels):
         total = [] #Create empty list of desired size,numOfPixels
@@ -86,8 +103,44 @@ class DataTools:
         for i in range(numOfPixels):
             averagedSpectra.append([float(i),  total[i]]) 
         return np.array(averagedSpectra)
-  
-
+    
+    @staticmethod
+    def GetAveragedData(allSpectras, xlength, ylength):
+        totalx = [] 
+        totaly =[]
+        
+        for i in range(xlength):
+            totalx.append(0.)
+            
+        averagedSpectra = [] 
+        for eachSpectra in allSpectras:
+            for i in range(ylength):
+                for j in range(xlength):
+                    totalx[j] += eachSpectra[j].T[1] 
+                totaly[i]    
+        for i in range(ylength):
+            for j in range(xlength):
+                totalx[j] = totalx[j]/len(allSpectras)
+                
+        for i in range(ylength):
+            for j in range(xlength):
+                averagedSpectra.append([totalx[j]]) 
+                
+        return np.array(averagedSpectra)
+    
+        iterDimOfMainMatrix = range(orderOfApprox + 2)
+        mainMatrix = []
+    
+        for col in iterDimOfMainMatrix:
+            rowMatrix = []
+            for row in iterDimOfMainMatrix:
+                rowMatrix.append(np.sum(i**(row+col-2)))
+            rowMatrixCopy = rowMatrix.copy()
+            mainMatrix.append(rowMatrixCopy)
+            #print('theMatrix: ' + str(theMatrix))
+            del rowMatrix
+        return mainMatrix
+    
     def GetMean(self, img):
         x = img.flatten()
         mean1 = np.sum(x)/(np.size(x))
