@@ -95,7 +95,6 @@ class DataTools:
         averagedSpectra = [] 
         for eachSpectra in allSpectras:
             for i in range(numOfPixels):
-                print('range(numOfPixels): ' + str(range(numOfPixels)))
                 total[i] += eachSpectra[i].T[1] #Summing values of allSpectras for each pixel
         for i in range(numOfPixels):
             #Dividing that total by number of spectras to get average

@@ -44,7 +44,7 @@ def CreateWLCalibrationMainMatrix(orderOfApprox, i):
         rowMatrix = []
         for row in iterDimOfMainMatrix:
             rowMatrix.append(np.sum(i**(row+col-2)))
-        rowMatrixCopy = rowMatrix.copy()
+        rowMatrixCopy = rowMatrix[:]
         mainMatrix.append(rowMatrixCopy)
         #print('theMatrix: ' + str(theMatrix))
         del rowMatrix
