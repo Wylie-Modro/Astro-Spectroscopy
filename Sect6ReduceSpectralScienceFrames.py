@@ -6,21 +6,10 @@ import matplotlib.pyplot as plt
 import SpectraClasses as SpectraCls
 import pyfits
 
-'''
-image = pyfits.open('data-2013-10-26-shane-public/biasData/b101.fits')
-#print('image: '+str(type(image)))
-#print('image: '+str(image))
-#imagehead = image[0].header
-#print imagehead['EXPTIME']
-
-imagedata = image[0].data
-for i in imagedata:
-    xlength=len(i)
-ylength=len(imagedata)
-'''
 
 LoadData = SpectraCls.LoadingData()
 DataTools = SpectraCls.DataTools()
+CentroidAl = SpectraCls.CentroidAlgorithm()
 
 [allBiasData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b1', 'data-2013-10-26-shane-public/biasData/')
 averagedBiasData = DataTools.NewGetAveragedData(allBiasData, xlength, ylength)
@@ -46,17 +35,30 @@ flatNormalized = (domeMinusBias+1)/(np.median(domeMinusBias)+1)
 oneDb151Normalized=(s151MinusBias/(flatNormalized+1)).flatten()
 oneDb157Normalized=(s157MinusBias/(flatNormalized+1)).flatten()
 
-plt.figure(1)
-plt.subplot(211)
-plt.plot(oneDb151Normalized)
 
-plt.subplot(212)
-plt.plot(oneDb157Normalized)
+fig = plt.figure()
+ax1 = fig.add_subplot(211)
+ax2 = fig.add_subplot(212)
+ax1.title.set_text('b151 Normalized')
+ax2.title.set_text('b157 Normalized')
+ax1.set_xlabel('Pixel Number')
+ax1.set_ylabel('Intensity (W/m^2)')
+ax2.set_xlabel('Pixel Number')
+ax2.set_ylabel('Intensity (W/m^2)')   
+ax1.plot(oneDb151Normalized)
+ax2.plot(oneDb157Normalized)
+#plt.show()
+
+fig = plt.figure()
+ax1 = fig.add_subplot(211)
+ax2 = fig.add_subplot(212)
+ax1.title.set_text('b151 Normalized')
+ax2.title.set_text('b157 Normalized')
+ax1.set_xlabel('Wavelength (nm)')
+ax1.set_ylabel('Intensity (W/m^2)')
+ax2.set_xlabel('Wavelength (nm)')
+ax2.set_ylabel('Intensity (W/m^2)')   
+ax1.plot(CentroidAl.SimplePixlToWLMapping(np.arange(len(oneDb151Normalized))), oneDb151Normalized)
+ax2.plot(CentroidAl.SimplePixlToWLMapping(np.arange(len(oneDb157Normalized))), oneDb157Normalized)
 plt.show()
-'''
-fig1 = plt.figure(1)
-
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-'''
 
