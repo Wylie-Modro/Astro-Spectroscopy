@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import SpectraClasses as SpectraCls
 import pyfits
 
+'''
 image = pyfits.open('data-2013-10-26-shane-public/biasData/b101.fits')
 #print('image: '+str(type(image)))
 #print('image: '+str(image))
@@ -16,27 +17,46 @@ imagedata = image[0].data
 for i in imagedata:
     xlength=len(i)
 ylength=len(imagedata)
+'''
 
 LoadData = SpectraCls.LoadingData()
 DataTools = SpectraCls.DataTools()
 
 [allBiasData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b1', 'data-2013-10-26-shane-public/biasData/')
+averagedBiasData = DataTools.NewGetAveragedData(allBiasData, xlength, ylength)
 
-averagedResult = DataTools.NewGetAveragedData(allBiasData, xlength, ylength)#print('averagedResult: ' + str(averagedResult))
-'''
-averagedBiasData = DataTools.GetAveragedData(allBiasData, 2048)
-fig = plt.figure()     
-ax1 = fig.add_subplot(111)
-DataTools.SpectraPlot(averagedBiasData, ax1, 'Averaged Bias Image', 'xPixel', 'yPixel')
+[b151ScienceData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b151', 'data-2013-10-26-shane-public/scienceData/')
+[b157ScienceData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b157', 'data-2013-10-26-shane-public/scienceData/')
+
+s151MinusBias = np.array(b151ScienceData)-averagedBiasData
+s157MinusBias = np.array(b157ScienceData)-averagedBiasData
+#print(s151MinusBias)
+#print(s157MinusBias)
+
+[allDomeData,xlength,ylength] = LoadData.LoadDataFromDirectoryIntoArray('b1', 'data-2013-10-26-shane-public/domeData/')
+averagedDomeData = DataTools.NewGetAveragedData(allDomeData, xlength, ylength)
+domeMinusBias = averagedDomeData-averagedBiasData
+#print(domeMinusBias)
+
+flatNormalized = (domeMinusBias+1)/(np.median(domeMinusBias)+1)
+
+#print(flatNormalized)
+
+#print(s151MinusBias/(flatNormalized+1))
+oneDb151Normalized=(s151MinusBias/(flatNormalized+1)).flatten()
+oneDb157Normalized=(s157MinusBias/(flatNormalized+1)).flatten()
+
+plt.figure(1)
+plt.subplot(211)
+plt.plot(oneDb151Normalized)
+
+plt.subplot(212)
+plt.plot(oneDb157Normalized)
 plt.show()
 '''
-#print(allBiasData)
-print(xlength)
-print(ylength)
-print('-------------------------------------------------------')
+fig1 = plt.figure(1)
 
-#for dataSet in allBiasData:
-    #print('dataSet: ' + str(dataSet))
-    
-
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+'''
 

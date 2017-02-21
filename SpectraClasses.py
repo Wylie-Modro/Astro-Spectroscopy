@@ -116,27 +116,10 @@ class DataTools:
         
         for eachSpectra in allSpectras:
             summedMatrix += np.matrix(eachSpectra)
-        print('summedMatrix before: ' + str(summedMatrix))
         
-        summedMatrix =  summedMatrix/len(allSpectras)
+        averageMatrix =  summedMatrix/len(allSpectras)
+        return np.array(averageMatrix)
         
-        '''
-        averagedlist = []
-        for y in range(ylength):
-            averagedlist.append([])
-            for x in range(xlength):
-                averagedlist[y].append(0)
-        summedMatrix = np.matrix(summedList)
-        for row in summedMatrix:
-            for entry in row:
-                print('entry before: ' + str(entry))
-                entry = entry/len(allSpectras)
-                print('entry after: ' + str(entry))
-        print('summedMatrix after: ' + str(summedMatrix))
-        averagedMatrix = summedMatrix
-        '''
-        print('summedMatrix: ' + str(summedMatrix))
-    
     @staticmethod
     def GetAveragedData(allSpectras, xlength, ylength):
         print('xlength:' + str(xlength))
